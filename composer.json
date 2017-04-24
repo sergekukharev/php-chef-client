@@ -2,6 +2,9 @@
     "name": "sergekukharev/php-chef-client",
     "description": "Chef Client for PHP Applications",
     "type": "library",
+    "require": {
+      "php": ">=5.5"
+    },
     "require-dev": {
         "phpunit/phpunit": "^4.8",
         "squizlabs/php_codesniffer": "^2.8",
