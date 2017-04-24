@@ -39,6 +39,6 @@
         ],
         "test": "./vendor/bin/phpunit",
         "code-style": "./vendor/bin/phpcs src/ --standard=PSR2",
-        "find-mess": "./vendor/bin/phpmd src/ text cleancode,codesize,design,naming,unusedcode"
+        "find-mess": "./vendor/bin/phpmd src/ text phpmd-ruleset"
     }
 }
