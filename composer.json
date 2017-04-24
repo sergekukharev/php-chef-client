@@ -3,12 +3,25 @@
     "description": "Chef Client for PHP Applications",
     "type": "library",
     "require": {
-      "php": ">=5.5"
+      "php": ">=5.5",
+      "guzzle/guzzle": "^3.9",
+      "leaseweb/chefauth-guzzle-plugin": "^1.0",
+      "webmozart/assert": "^1.2"
     },
     "require-dev": {
         "phpunit/phpunit": "^4.8",
         "squizlabs/php_codesniffer": "^2.8",
         "phpmd/phpmd": "^2.6"
+    },
+    "autoload": {
+      "psr-4": {
+        "Sergekukharev\\PhpChefClient\\": "src/"
+      }
+    },
+    "autoload-dev": {
+      "psr-4": {
+        "Sergekukharev\\PhpChefClient\\": "test/"
+      }
     },
     "license": "Apache License 2.0",
     "authors": [
