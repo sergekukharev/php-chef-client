@@ -112,4 +112,11 @@ class DataBagItemTest extends \PHPUnit_Framework_TestCase
         self::assertEquals($databag, $normallyCreatedDatabag);
         self::assertNotSame($databag, $normallyCreatedDatabag);
     }
+
+    public function testFactoryMethodValidatesJson()
+    {
+        $this->setExpectedException(\RuntimeException::class);
+
+        DataBagItem::fromJson(self::DATABAG_NAME, 'not-a-json');
+    }
 }

@@ -2,6 +2,8 @@
 
 namespace Sergekukharev\PhpChefClient;
 
+use Webmozart\Assert\Assert;
+
 class DataBagItem
 {
     /**
@@ -26,7 +28,13 @@ class DataBagItem
 
     public static function fromJson($name, $json)
     {
-        return new static($name, json_decode($json, true));
+        $data = json_decode($json, true);
+
+        if ($data === null) {
+            throw new \RuntimeException('Invalid JSON provided');
+        }
+
+        return new static($name, $data);
     }
 
     /**
