@@ -20,10 +20,21 @@ class Chef
      */
     private $cacheAdapter;
 
+    /**
+     * @var bool
+     */
+    private $cachingEnabled = true;
+
     public function __construct(ClientInterface $client, CacheItemPoolInterface $cacheAdapter = null)
     {
         $this->client = $client;
-        $this->cacheAdapter = $cacheAdapter === null ? new VoidCachePool() : $cacheAdapter;
+
+        if ($cacheAdapter === null) {
+            $cacheAdapter = new VoidCachePool();
+            $this->cachingEnabled = false;
+        }
+
+        $this->cacheAdapter = $cacheAdapter;
     }
 
     /**
@@ -65,5 +76,15 @@ class Chef
         $this->cacheAdapter->set($cacheKey, $response);
 
         return $response;
+    }
+
+    public function getClient()
+    {
+        return $this->client;
+    }
+
+    public function isCachingEnabled()
+    {
+        return $this->cachingEnabled;
     }
 }

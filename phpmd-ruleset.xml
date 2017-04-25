@@ -18,9 +18,4 @@
     <rule ref="rulesets/cleancode.xml">
         <exclude name="StaticAccess" />
     </rule>
-    <rule ref="rulesets/cleancode.xml/StaticAccess">
-        <properties>
-            <property name="exceptions" value="\Webmozart\Assert\Assert" />
-        </properties>
-    </rule>
 </ruleset>

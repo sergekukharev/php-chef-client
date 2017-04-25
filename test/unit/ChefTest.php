@@ -186,4 +186,20 @@ class ChefTest extends \PHPUnit_Framework_TestCase
             ->with($cacheKey)
             ->willReturn($value);
     }
+
+    public function testCanProvideClient()
+    {
+        self::assertSame($this->clientMock, $this->chef->getClient());
+    }
+
+    public function testCanTellIfCachingIsEnabled()
+    {
+        self::assertTrue($this->chef->isCachingEnabled());
+    }
+
+    public function testCanTellIfCachingIsDisabled()
+    {
+        $chefWithoutCache = new Chef($this->clientMock, null);
+        self::assertFalse($chefWithoutCache->isCachingEnabled());
+    }
 }
