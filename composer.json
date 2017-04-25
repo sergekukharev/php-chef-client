@@ -1,44 +1,47 @@
 {
-    "name": "sergekukharev/php-chef-client",
-    "description": "Chef Client for PHP Applications",
-    "type": "library",
-    "require": {
-      "php": ">=5.5",
-      "guzzle/guzzle": "^3.9",
-      "leaseweb/chefauth-guzzle-plugin": "^1.0",
-      "webmozart/assert": "^1.2"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^4.8",
-        "squizlabs/php_codesniffer": "^2.8",
-        "phpmd/phpmd": "^2.6"
-    },
-    "autoload": {
-      "psr-4": {
-        "Sergekukharev\\PhpChefClient\\": "src/"
-      }
-    },
-    "autoload-dev": {
-      "psr-4": {
-        "Sergekukharev\\PhpChefClient\\": "test/"
-      }
-    },
-    "license": "Apache License 2.0",
-    "authors": [
-        {
-            "name": "Serge Kukharev",
-            "email": "serge.kukharev@gmail.com"
-        }
-    ],
-    "minimum-stability": "stable",
-    "scripts": {
-        "build": [
-            "@test",
-            "@code-style",
-            "@find-mess"
-        ],
-        "test": "./vendor/bin/phpunit",
-        "code-style": "./vendor/bin/phpcs src/ --standard=PSR2",
-        "find-mess": "./vendor/bin/phpmd src/ text phpmd-ruleset"
+  "name": "sergekukharev/php-chef-client",
+  "description": "Chef Client for PHP Applications",
+  "type": "library",
+  "require": {
+    "php": ">=5.5",
+    "guzzle/guzzle": "^3.9",
+    "leaseweb/chefauth-guzzle-plugin": "^1.0",
+    "webmozart/assert": "^1.2",
+    "cache/filesystem-adapter": "^0.4.0",
+    "psr/cache":            "^1.0",
+    "cache/void-adapter": "^0.4.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^4.8",
+    "squizlabs/php_codesniffer": "^2.8",
+    "phpmd/phpmd": "^2.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "Sergekukharev\\PhpChefClient\\": "src/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Sergekukharev\\PhpChefClient\\": "test/"
+    }
+  },
+  "license": "Apache License 2.0",
+  "authors": [
+    {
+      "name": "Serge Kukharev",
+      "email": "serge.kukharev@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "scripts": {
+    "build": [
+      "@test",
+      "@code-style",
+      "@find-mess"
+    ],
+    "test": "./vendor/bin/phpunit",
+    "code-style": "./vendor/bin/phpcs src/ --standard=PSR2",
+    "find-mess": "./vendor/bin/phpmd src/ text phpmd-ruleset"
+  }
 }

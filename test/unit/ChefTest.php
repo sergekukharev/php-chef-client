@@ -2,12 +2,13 @@
 
 namespace Sergekukharev\PhpChefClient;
 
+use Cache\Adapter\Void\VoidCachePool;
 use Guzzle\Http\ClientInterface;
 use Guzzle\Http\Message\Request;
-use Guzzle\Http\Message\RequestInterface;
 use Guzzle\Http\Message\Response;
 use InvalidArgumentException;
 use PHPUnit_Framework_MockObject_MockObject;
+use Psr\Cache\CacheItemPoolInterface;
 
 class ChefTest extends \PHPUnit_Framework_TestCase
 {
@@ -19,6 +20,14 @@ class ChefTest extends \PHPUnit_Framework_TestCase
         'db_pass' => 'qwerty',
         'db_host' => 'localhost'
     ];
+
+    private static $dataBagItemCached = [
+        'db_name' => 'cache',
+        'db_user' => 'cache',
+        'db_pass' => 'cache',
+        'db_host' => 'cache'
+    ];
+
     const DATA_BAG_NAME = 'databag';
 
     /**
@@ -27,21 +36,21 @@ class ChefTest extends \PHPUnit_Framework_TestCase
     private $clientMock;
 
     /**
-     * @var RequestInterface | PHPUnit_Framework_MockObject_MockObject
-     */
-    private $requestMock;
-
-    /**
      * @var Chef
      */
     private $chef;
 
+    /**
+     * @var CacheItemPoolInterface | PHPUnit_Framework_MockObject_MockObject
+     */
+    private $cacheMock;
+
     public function setUp()
     {
         $this->clientMock = $this->getMockBuilder(ClientInterface::class)->getMock();
-        $this->requestMock = $this->getMockBuilder(RequestInterface::class)->getMock();
+        $this->cacheMock = $this->getMockBuilder(VoidCachePool::class)->getMock();
 
-        $this->chef = new Chef($this->clientMock);
+        $this->chef = new Chef($this->clientMock, $this->cacheMock);
     }
 
     public function testGetDataBagItemReturnsValidItem()
@@ -76,6 +85,8 @@ class ChefTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider provideGetDataBagItemInvalidInput
+     * @param $dataBagName
+     * @param $dataBagItemName
      */
     public function testGetDataBagItemChecksDataBagNameAndDataBagItemName($dataBagName, $dataBagItemName)
     {
@@ -94,5 +105,85 @@ class ChefTest extends \PHPUnit_Framework_TestCase
             [self::DATA_BAG_NAME, 123],
             [self::DATA_BAG_NAME, null],
         ];
+    }
+
+    public function testGetDataBagItemCachesRequest()
+    {
+        $uri = 'data/' . self::DATA_BAG_NAME . '/' . self::DATA_BAG_ITEM_NAME;
+        $cacheKey = str_replace('/', Chef::CACHE_KEY_SPECIAL_CHAR_REPLACER, $uri);
+
+        $this->cacheDoesntHaveItem($cacheKey);
+
+        $this->cacheWillSaveItem($cacheKey);
+
+        $this->prepareClientMock(
+            $uri,
+            'get',
+            new Response(StatusCode::OK, [], json_encode(self::$dataBagItemContent))
+        );
+
+        $this->chef->getDataBagItem(self::DATA_BAG_NAME, self::DATA_BAG_ITEM_NAME);
+    }
+
+    /**
+     * @param string $cacheKey
+     */
+    private function cacheDoesntHaveItem($cacheKey)
+    {
+        $this->cacheMock
+            ->expects(self::once())
+            ->method('has')
+            ->with($cacheKey)
+            ->willReturn(false);
+    }
+
+    /**
+     * @param string $cacheKey
+     */
+    private function cacheWillSaveItem($cacheKey)
+    {
+        $this->cacheMock
+            ->expects(self::once())
+            ->method('set')
+            ->with($cacheKey, self::anything());
+    }
+
+    public function testGetDataBagItemWillReturnCachedRequestFirst()
+    {
+        $uri = 'data/' . self::DATA_BAG_NAME . '/' . self::DATA_BAG_ITEM_NAME;
+        $cacheKey = str_replace('/', Chef::CACHE_KEY_SPECIAL_CHAR_REPLACER, $uri);
+        $cachedResponse = new Response(StatusCode::OK, [], json_encode(self::$dataBagItemCached));
+
+        $this->cacheHasItem($cacheKey);
+        $this->cacheWillReturnValue($cacheKey, $cachedResponse);
+
+        $dataBagItem = $this->chef->getDataBagItem(self::DATA_BAG_NAME, self::DATA_BAG_ITEM_NAME);
+        self::assertEquals(
+            DataBagItem::fromJson(self::DATA_BAG_ITEM_NAME, json_encode(self::$dataBagItemCached)),
+            $dataBagItem
+        );
+
+        self::assertNotEquals(
+            DataBagItem::fromJson(self::DATA_BAG_ITEM_NAME, json_encode(self::$dataBagItemContent)),
+            $dataBagItem
+        );
+    }
+
+    private function cacheHasItem($cacheKey)
+    {
+        $this->cacheMock
+            ->expects(self::once())
+            ->method('has')
+            ->with($cacheKey)
+            ->willReturn(true);
+    }
+
+    private function cacheWillReturnValue($cacheKey, $value)
+    {
+        $this->cacheMock
+            ->expects(self::once())
+            ->method('get')
+            ->with($cacheKey)
+            ->willReturn($value);
     }
 }
