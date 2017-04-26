@@ -2,6 +2,7 @@
 
 namespace Sergekukharev\PhpChefClient;
 
+use Cache\Adapter\Common\CacheItem;
 use Cache\Adapter\Void\VoidCachePool;
 use Guzzle\Http\ClientInterface;
 use Guzzle\Http\Exception\ClientErrorResponseException;
@@ -16,7 +17,7 @@ class Chef
      */
     private $client;
     /**
-     * @var CacheItemPoolInterface|null
+     * @var CacheItemPoolInterface
      */
     private $cacheAdapter;
 
@@ -61,19 +62,19 @@ class Chef
     /**
      * @param string $uri
      * @return \Guzzle\Http\Message\Response
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \Guzzle\Http\Exception\RequestException
      */
     private function sendCachedGetRequest($uri)
     {
         $cacheKey = str_replace('/', self::CACHE_KEY_SPECIAL_CHAR_REPLACER, $uri);
 
-        if ($this->cacheAdapter->has($cacheKey)) {
-            return $this->cacheAdapter->get($cacheKey);
+        if ($this->cacheAdapter->hasItem($cacheKey)) {
+            return $this->cacheAdapter->getItem($cacheKey)->get();
         }
 
         $response = $this->client->get($uri)->send();
-        $this->cacheAdapter->set($cacheKey, $response);
+
+        $this->cacheAdapter->save(new CacheItem($cacheKey, true, $response));
 
         return $response;
     }

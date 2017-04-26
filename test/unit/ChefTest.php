@@ -2,6 +2,7 @@
 
 namespace Sergekukharev\PhpChefClient;
 
+use Cache\Adapter\Common\CacheItem;
 use Cache\Adapter\Void\VoidCachePool;
 use Guzzle\Http\ClientInterface;
 use Guzzle\Http\Message\Request;
@@ -114,7 +115,7 @@ class ChefTest extends \PHPUnit_Framework_TestCase
 
         $this->cacheDoesntHaveItem($cacheKey);
 
-        $this->cacheWillSaveItem($cacheKey);
+        $this->cacheWillSaveItem();
 
         $this->prepareClientMock(
             $uri,
@@ -132,20 +133,20 @@ class ChefTest extends \PHPUnit_Framework_TestCase
     {
         $this->cacheMock
             ->expects(self::once())
-            ->method('has')
+            ->method('hasItem')
             ->with($cacheKey)
             ->willReturn(false);
     }
 
     /**
-     * @param string $cacheKey
+     * @internal param string $cacheKey
      */
-    private function cacheWillSaveItem($cacheKey)
+    private function cacheWillSaveItem()
     {
         $this->cacheMock
             ->expects(self::once())
-            ->method('set')
-            ->with($cacheKey, self::anything());
+            ->method('save')
+            ->with(self::isInstanceOf(CacheItem::class));
     }
 
     public function testGetDataBagItemWillReturnCachedRequestFirst()
@@ -173,7 +174,7 @@ class ChefTest extends \PHPUnit_Framework_TestCase
     {
         $this->cacheMock
             ->expects(self::once())
-            ->method('has')
+            ->method('hasItem')
             ->with($cacheKey)
             ->willReturn(true);
     }
@@ -182,9 +183,9 @@ class ChefTest extends \PHPUnit_Framework_TestCase
     {
         $this->cacheMock
             ->expects(self::once())
-            ->method('get')
+            ->method('getItem')
             ->with($cacheKey)
-            ->willReturn($value);
+            ->willReturn(new CacheItem($cacheKey, true, $value));
     }
 
     public function testCanProvideClient()
